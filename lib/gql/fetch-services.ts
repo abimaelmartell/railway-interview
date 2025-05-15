@@ -1,5 +1,5 @@
-import { gql } from "graphql-request";
-import railwayApi from "./client";
+import { gql } from 'graphql-request'
+import railwayApi from './client'
 
 const QUERY = gql`
   query {
@@ -47,80 +47,75 @@ const QUERY = gql`
       }
     }
   }
-`;
+`
 
-export type RailwayServiceStatus =
-  | "SUCCESS"
-  | "FAILED"
-  | "REMOVED"
-  | "RUNNING"
-  | string;
+export type RailwayServiceStatus = 'SUCCESS' | 'FAILED' | 'REMOVED' | 'RUNNING' | string
 
 export type Deployment = {
-  id: string;
-  status: RailwayServiceStatus;
-  createdAt: string;
-};
+  id: string
+  status: RailwayServiceStatus
+  createdAt: string
+}
 
 export type DeploymentEdge = {
-  node: Deployment;
-};
+  node: Deployment
+}
 
 export type Service = {
-  id: string;
-  name: string;
-  icon: string | null;
+  id: string
+  name: string
+  icon: string | null
   deployments: {
-    edges: DeploymentEdge[];
-  };
+    edges: DeploymentEdge[]
+  }
   repoTriggers: {
-    edges: RepoTriggerEdge[];
-  };
-};
+    edges: RepoTriggerEdge[]
+  }
+}
 
 export type ServiceEdge = {
-  node: Service;
-};
+  node: Service
+}
 
 export type Project = {
-  id: string;
-  name: string;
+  id: string
+  name: string
   services: {
-    edges: ServiceEdge[];
-  };
-};
+    edges: ServiceEdge[]
+  }
+}
 
 export type ProjectEdge = {
-  cursor: string;
-  node: Project;
-};
+  cursor: string
+  node: Project
+}
 
 export type Workspace = {
-  id: string;
-  name: string;
+  id: string
+  name: string
   team: {
     projects: {
-      edges: ProjectEdge[];
-    };
-  };
-};
+      edges: ProjectEdge[]
+    }
+  }
+}
 
 export type RepoTrigger = {
-  provider: string;
-};
+  provider: string
+}
 
 export type RepoTriggerEdge = {
-  node: RepoTrigger;
-};
+  node: RepoTrigger
+}
 
 export type RailwayProjectsWithServicesData = {
   me: {
-    workspaces: Workspace[];
-  };
-};
+    workspaces: Workspace[]
+  }
+}
 
 export const fetchProjectsWithServices = async () => {
-  const data = await railwayApi.request<RailwayProjectsWithServicesData>(QUERY);
+  const data = await railwayApi.request<RailwayProjectsWithServicesData>(QUERY)
 
-  return data;
-};
+  return data
+}
