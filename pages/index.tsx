@@ -41,7 +41,6 @@ export default function Containers({ data }: Props) {
     }
   }, [deploymentPending, handleRefresh])
 
-
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-3xl mx-auto bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex items-center justify-between mb-8">

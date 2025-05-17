@@ -3,7 +3,7 @@ import railwayApi from './client'
 import { Service } from './types'
 
 const QUERY = gql`
-  query($serviceId: String!) {
+  query ($serviceId: String!) {
     service(id: $serviceId) {
       id
       name

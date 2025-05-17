@@ -1,140 +1,150 @@
-import { useCallback, useState } from 'react'
-import Image from 'next/image'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
-import { mapStatus } from '@/lib/utils'
+import { hasPendingDeployment } from '@/lib/utils'
 import { Service, Environment } from '@/lib/gql/types'
+
+import LoadingIcon from '@/components/LoadingIcon'
+import DeploymentRow from './DeploymentRow'
+import ServiceCardHeader from './ServiceCardHeader'
 
 type Props = {
   initialService: Service
   environment: Environment
 }
 
-const DEFAULT_ICON = 'https://devicons.railway.com/i/github-dark.svg'
+const MAX_POLL_ATTEMPTS = 30
+const POLL_INTERVAL_MS = 2000
 
 export default function ServiceCard({ initialService, environment }: Props) {
-  const [isSpinningDown, setIsSpinningDown] = useState(false)
-  const [isSpinningUp, setIsSpinningUp] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [service, setService] = useState<Service>(initialService)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isSpinningUp, setIsSpinningUp] = useState(false)
+  const [isSpinningDown, setIsSpinningDown] = useState(false)
+
+  const pollCount = useRef(0)
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
 
-    const response = await fetch(`/api/refresh-service`, {
-      method: 'POST',
-      body: JSON.stringify({ serviceId: service.id }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    try {
+      const response = await fetch(`/api/refresh-service`, {
+        method: 'POST',
+        body: JSON.stringify({ serviceId: service.id }),
+        headers: { 'Content-Type': 'application/json' },
+      })
 
-    if (!response.ok) {
-      console.error('Failed to refresh service')
+      if (!response.ok) {
+        console.error('Failed to refresh service')
+        return
+      }
+
+      const data = await response.json()
+      setService(data.service)
+    } catch (err) {
+      console.error(err)
+    } finally {
       setIsRefreshing(false)
-      return
     }
-
-    const data = await response.json()
-    setService(data.service)
-    setIsRefreshing(false)
   }, [service.id])
 
   const handleSpinDown = async (deploymentId: string) => {
-    const confirmed = confirm(`Are you sure you want to spin down service ${service.name}?`)
-    if (!confirmed) return
+    if (!confirm(`Are you sure you want to spin down service ${service.name}?`)) return
 
     setIsSpinningDown(true)
 
     await fetch(`/api/spin-down`, {
       method: 'POST',
       body: JSON.stringify({ deploymentId }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     })
 
-    // wait a bit to get actual state
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    setIsSpinningDown(false)
-    handleRefresh()
+    setTimeout(() => {
+      setIsSpinningDown(false)
+      handleRefresh()
+    }, 1000)
   }
 
-  const handleSpinUp = async (serviceId: string) => {
-    const confirmed = confirm(`Are you sure you want to spin up service ${service.name}?`)
-    if (!confirmed) return
+  const handleSpinUp = async () => {
+    if (!confirm(`Are you sure you want to spin up service ${service.name}?`)) return
 
     setIsSpinningUp(true)
 
     await fetch(`/api/spin-up`, {
       method: 'POST',
-      body: JSON.stringify({ serviceId, environmentId: environment.id }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      body: JSON.stringify({
+        serviceId: service.id,
+        environmentId: environment.id,
+      }),
+      headers: { 'Content-Type': 'application/json' },
     })
 
-    // wait a bit to get actual state
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    setIsSpinningUp(false)
-    handleRefresh()
+    setTimeout(() => {
+      setIsSpinningUp(false)
+      handleRefresh()
+    }, 1000)
   }
 
   const hasRunningDeployment = service.deployments.edges.some(
     (deployment) => deployment.node.status === 'SUCCESS',
   )
 
-  const hasPendingDeployment = service.deployments.edges.some((deployment) =>
-    DEPLOYMENT_PENDING_STATUSES.includes(deployment.node.status),
-  )
+  const pending = hasPendingDeployment(service.deployments)
+
+  useEffect(() => {
+    if (!pending) return
+
+    const interval = setInterval(() => {
+      if (pollCount.current >= MAX_POLL_ATTEMPTS) {
+        clearInterval(interval)
+        return
+      }
+
+      pollCount.current += 1
+      handleRefresh()
+    }, POLL_INTERVAL_MS)
+
+    return () => {
+      clearInterval(interval)
+      pollCount.current = 0
+    }
+  }, [pending, handleRefresh])
 
   return (
-    <div className="border border-gray-200 rounded p-4 bg-gray-50 space-y-3 shadow" onClick={handleRefresh}>
-      <div className="flex items-center gap-2 justify-between">
-        <h4 className="text-md font-medium">{service.name}</h4>
-
-        <Image src={service.icon ?? DEFAULT_ICON} alt={service.name} width={80} height={80} />
-      </div>
+    <div className="border border-gray-200 rounded p-4 bg-gray-50 space-y-3 shadow">
+      <ServiceCardHeader
+        service={service}
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+        pending={pending}
+      />
 
       <div className="grid grid-cols-1 gap-2">
-        {!hasRunningDeployment && !isSpinningUp && !hasPendingDeployment && (
+        {!hasRunningDeployment && !pending && !isSpinningUp && (
           <button
-            className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200"
-            onClick={() => handleSpinUp(service.id)}
+            className="text-xs font-medium px-3 py-2 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200"
+            onClick={handleSpinUp}
+            disabled={isSpinningUp}
           >
             Spin Up Service
           </button>
         )}
 
-        {isSpinningUp && <span className="text-xs font-medium text-gray-500">Spinning up...</span>}
+        {isSpinningUp && (
+          <div className="text-xs font-medium text-blue-700 flex items-center gap-1">
+            <LoadingIcon className="w-4 h-4 animate-spin" />
+            Spinning up...
+          </div>
+        )}
 
         {service.deployments.edges.map((deployment) => {
-          const isRunning = deployment.node.status === 'SUCCESS'
-
           return (
-            <div
+            <DeploymentRow
               key={deployment.node.id}
-              className="flex items-center justify-between px-3 py-2 bg-green-50 border border-green-200 rounded"
-            >
-              <span className="text-sm font-medium text-green-800">
-                {mapStatus(deployment.node.status)}
-              </span>
-
-              {isRunning && !isSpinningDown && (
-                <button
-                  className="text-xs font-medium px-3 py-1 rounded transition bg-red-100 text-red-800 hover:bg-red-200"
-                  onClick={() => handleSpinDown(deployment.node.id)}
-                >
-                  Spin Down
-                </button>
-              )}
-
-              {isSpinningDown && (
-                <span className="text-xs font-medium text-gray-500">Spinning down...</span>
-              )}
-            </div>
+              deploymentId={deployment.node.id}
+              status={deployment.node.status}
+              isSpinningDown={isSpinningDown}
+              onSpinDown={handleSpinDown}
+            />
           )
         })}
       </div>

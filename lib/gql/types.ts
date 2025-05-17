@@ -1,5 +1,4 @@
-
-export type RailwayServiceStatus = 'SUCCESS' | 'FAILED' | 'REMOVED' | 'RUNNING' | string
+export type ServiceStatus = 'SUCCESS' | 'FAILED' | 'REMOVED' | 'RUNNING' | string
 
 type Nodes<T> = {
   edges: {
@@ -7,16 +6,14 @@ type Nodes<T> = {
   }[]
 }
 
-
 export type Environment = {
   id: string
   name: string
 }
 
-
 export type Deployment = {
   id: string
-  status: RailwayServiceStatus
+  status: ServiceStatus
   createdAt: string
 }
 
@@ -26,7 +23,6 @@ export type Service = {
   icon: string | null
   deployments: Nodes<Deployment>
 }
-
 
 export type Project = {
   id: string
