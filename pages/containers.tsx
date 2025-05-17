@@ -9,12 +9,13 @@ import {
 
 import WorkspaceList from '@/components/WorkspaceList'
 import LoadingIcon from '@/components/LoadingIcon'
+import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
 
 type Props = {
   data: RailwayProjectsWithServicesData
 }
 
-const deployment_pending_statuses = ['BUILDING', 'DEPLOYING', 'INITIALIZING']
+const REFRESH_INTERVAL = 1000
 
 export default function Containers({ data }: Props) {
   const router = useRouter()
@@ -24,7 +25,7 @@ export default function Containers({ data }: Props) {
   const deploymentPending = data.me.workspaces.some((w) =>
     w.team.projects.edges.some((p) =>
       p.node.services.edges.some((s) =>
-        s.node.deployments.edges.some((d) => deployment_pending_statuses.includes(d.node.status)),
+        s.node.deployments.edges.some((d) => DEPLOYMENT_PENDING_STATUSES.includes(d.node.status)),
       ),
     ),
   )
@@ -38,7 +39,7 @@ export default function Containers({ data }: Props) {
     if (deploymentPending) {
       setTimeout(() => {
         handleRefresh()
-      }, 500)
+      }, REFRESH_INTERVAL)
     }
   }, [deploymentPending, handleRefresh])
 

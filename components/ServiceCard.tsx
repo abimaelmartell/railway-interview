@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { mapStatus } from '@/utils/map-status'
 import { Service, RailwayEnvironment } from '@/lib/gql/fetch-services'
 import { useState } from 'react'
+import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
 
 type Props = {
   service: Service
@@ -56,6 +57,10 @@ export default function ServiceCard({ service, environment, onChange }: Props) {
     (deployment) => deployment.node.status === 'SUCCESS',
   )
 
+  const hasPendingDeployment = service.deployments.edges.some((deployment) =>
+    DEPLOYMENT_PENDING_STATUSES.includes(deployment.node.status),
+  )
+
   return (
     <div className="border border-gray-200 rounded p-4 bg-gray-50 space-y-3 shadow">
       <div className="flex items-center gap-2 justify-between">
@@ -65,7 +70,7 @@ export default function ServiceCard({ service, environment, onChange }: Props) {
       </div>
 
       <div className="grid grid-cols-1 gap-2">
-        {!hasRunningDeployment && !isSpinningUp && (
+        {!hasRunningDeployment && !isSpinningUp && !hasPendingDeployment && (
           <button
             className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200"
             onClick={() => handleSpinUp(service.id)}
