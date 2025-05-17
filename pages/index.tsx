@@ -2,17 +2,15 @@ import { GetServerSideProps } from 'next'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
-import {
-  fetchProjectsWithServices,
-  RailwayProjectsWithServicesData,
-} from '@/lib/gql/fetch-services'
+import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
+import { fetchProjectsWithServices } from '@/lib/gql/fetch-services'
+import { ProjectsWithServicesData } from '@/lib/gql/types'
 
 import WorkspaceList from '@/components/WorkspaceList'
 import LoadingIcon from '@/components/LoadingIcon'
-import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
 
 type Props = {
-  data: RailwayProjectsWithServicesData
+  data: ProjectsWithServicesData
 }
 
 const REFRESH_INTERVAL = 1000

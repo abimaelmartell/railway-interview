@@ -1,22 +1,44 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import Image from 'next/image'
 
-import { Service, RailwayEnvironment } from '@/lib/gql/fetch-services'
 import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
 import { mapStatus } from '@/lib/utils'
+import { Service, Environment } from '@/lib/gql/types'
 
 type Props = {
-  service: Service
-  environment: RailwayEnvironment
-
-  onChange: () => void
+  initialService: Service
+  environment: Environment
 }
 
 const DEFAULT_ICON = 'https://devicons.railway.com/i/github-dark.svg'
 
-export default function ServiceCard({ service, environment, onChange }: Props) {
+export default function ServiceCard({ initialService, environment }: Props) {
   const [isSpinningDown, setIsSpinningDown] = useState(false)
   const [isSpinningUp, setIsSpinningUp] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [service, setService] = useState<Service>(initialService)
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true)
+
+    const response = await fetch(`/api/refresh-service`, {
+      method: 'POST',
+      body: JSON.stringify({ serviceId: service.id }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      console.error('Failed to refresh service')
+      setIsRefreshing(false)
+      return
+    }
+
+    const data = await response.json()
+    setService(data.service)
+    setIsRefreshing(false)
+  }, [service.id])
 
   const handleSpinDown = async (deploymentId: string) => {
     const confirmed = confirm(`Are you sure you want to spin down service ${service.name}?`)
@@ -32,8 +54,11 @@ export default function ServiceCard({ service, environment, onChange }: Props) {
       },
     })
 
+    // wait a bit to get actual state
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
     setIsSpinningDown(false)
-    onChange()
+    handleRefresh()
   }
 
   const handleSpinUp = async (serviceId: string) => {
@@ -50,8 +75,11 @@ export default function ServiceCard({ service, environment, onChange }: Props) {
       },
     })
 
+    // wait a bit to get actual state
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
     setIsSpinningUp(false)
-    onChange()
+    handleRefresh()
   }
 
   const hasRunningDeployment = service.deployments.edges.some(
@@ -63,7 +91,7 @@ export default function ServiceCard({ service, environment, onChange }: Props) {
   )
 
   return (
-    <div className="border border-gray-200 rounded p-4 bg-gray-50 space-y-3 shadow">
+    <div className="border border-gray-200 rounded p-4 bg-gray-50 space-y-3 shadow" onClick={handleRefresh}>
       <div className="flex items-center gap-2 justify-between">
         <h4 className="text-md font-medium">{service.name}</h4>
 
