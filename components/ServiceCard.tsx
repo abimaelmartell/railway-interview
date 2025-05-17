@@ -1,8 +1,9 @@
-import Image from 'next/image'
-import { mapStatus } from '@/utils/map-status'
-import { Service, RailwayEnvironment } from '@/lib/gql/fetch-services'
 import { useState } from 'react'
+import Image from 'next/image'
+
+import { Service, RailwayEnvironment } from '@/lib/gql/fetch-services'
 import { DEPLOYMENT_PENDING_STATUSES } from '@/lib/constants'
+import { mapStatus } from '@/lib/utils'
 
 type Props = {
   service: Service
