@@ -3,9 +3,11 @@ import { Project } from '@/lib/gql/fetch-services'
 
 type Props = {
   project: Project
+
+  onChange: () => void
 }
 
-export default function ProjectCard({ project }: Props) {
+export default function ProjectCard({ project, onChange }: Props) {
   return (
     <div className="bg-white border border-gray-200 shadow rounded-lg p-4 space-y-3">
       <h3 className="text-lg font-semibold">📁 {project.name}</h3>
@@ -16,6 +18,7 @@ export default function ProjectCard({ project }: Props) {
             key={node.id}
             service={node}
             environment={project.environments.edges[0].node}
+            onChange={onChange}
           />
         ))}
       </div>

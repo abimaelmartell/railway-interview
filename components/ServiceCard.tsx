@@ -6,11 +6,13 @@ import { useState } from 'react'
 type Props = {
   service: Service
   environment: RailwayEnvironment
+
+  onChange: () => void
 }
 
 const DEFAULT_ICON = 'https://devicons.railway.com/i/github-dark.svg'
 
-export default function ServiceCard({ service, environment }: Props) {
+export default function ServiceCard({ service, environment, onChange }: Props) {
   const [isSpinningDown, setIsSpinningDown] = useState(false)
   const [isSpinningUp, setIsSpinningUp] = useState(false)
 
@@ -29,6 +31,7 @@ export default function ServiceCard({ service, environment }: Props) {
     })
 
     setIsSpinningDown(false)
+    onChange()
   }
 
   const handleSpinUp = async (serviceId: string) => {
@@ -46,6 +49,7 @@ export default function ServiceCard({ service, environment }: Props) {
     })
 
     setIsSpinningUp(false)
+    onChange()
   }
 
   const hasRunningDeployment = service.deployments.edges.some(
