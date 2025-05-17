@@ -6,6 +6,8 @@ export function mapStatus(status: RailwayServiceStatus) {
       return '🟢  Running'
     case 'BUILDING':
       return '🟡  Building'
+    case 'DEPLOYING':
+      return '🟡  Deploying'
     default:
       return `🤷‍♂️  ${status}`
   }

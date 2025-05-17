@@ -1,8 +1,8 @@
 import ServiceCard from './ServiceCard'
-import { ProjectEdge } from '@/lib/gql/fetch-services'
+import { Project } from '@/lib/gql/fetch-services'
 
 type Props = {
-  project: ProjectEdge['node']
+  project: Project
 }
 
 export default function ProjectCard({ project }: Props) {
@@ -12,7 +12,11 @@ export default function ProjectCard({ project }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {project.services.edges.map(({ node }) => (
-          <ServiceCard key={node.id} service={node} />
+          <ServiceCard
+            key={node.id}
+            service={node}
+            environment={project.environments.edges[0].node}
+          />
         ))}
       </div>
     </div>

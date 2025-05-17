@@ -1,12 +1,53 @@
 import Image from 'next/image'
 import { mapStatus } from '@/utils/map-status'
-import { ServiceEdge } from '@/lib/gql/fetch-services'
+import { Service, RailwayEnvironment } from '@/lib/gql/fetch-services'
+import { useState } from 'react'
 
 type Props = {
-  service: ServiceEdge['node']
+  service: Service
+  environment: RailwayEnvironment
 }
 
-export default function ServiceCard({ service }: Props) {
+const DEFAULT_ICON = 'https://devicons.railway.com/i/github-dark.svg'
+
+export default function ServiceCard({ service, environment }: Props) {
+  const [isSpinningDown, setIsSpinningDown] = useState(false)
+  const [isSpinningUp, setIsSpinningUp] = useState(false)
+
+  const handleSpinDown = async (deploymentId: string) => {
+    const confirmed = confirm(`Are you sure you want to spin down service ${service.name}?`)
+    if (!confirmed) return
+
+    setIsSpinningDown(true)
+
+    await fetch(`/api/spin-down`, {
+      method: 'POST',
+      body: JSON.stringify({ deploymentId }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    setIsSpinningDown(false)
+  }
+
+  const handleSpinUp = async (serviceId: string) => {
+    const confirmed = confirm(`Are you sure you want to spin up service ${service.name}?`)
+    if (!confirmed) return
+
+    setIsSpinningUp(true)
+
+    await fetch(`/api/spin-up`, {
+      method: 'POST',
+      body: JSON.stringify({ serviceId, environmentId: environment.id }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    setIsSpinningUp(false)
+  }
+
   const hasRunningDeployment = service.deployments.edges.some(
     (deployment) => deployment.node.status === 'SUCCESS',
   )
@@ -16,20 +57,20 @@ export default function ServiceCard({ service }: Props) {
       <div className="flex items-center gap-2 justify-between">
         <h4 className="text-md font-medium">{service.name}</h4>
 
-        <Image
-          src={service.icon ?? 'https://devicons.railway.com/i/github-dark.svg'}
-          alt={service.name}
-          width={80}
-          height={80}
-        />
+        <Image src={service.icon ?? DEFAULT_ICON} alt={service.name} width={80} height={80} />
       </div>
 
       <div className="grid grid-cols-1 gap-2">
-        {!hasRunningDeployment && (
-          <button className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200">
+        {!hasRunningDeployment && !isSpinningUp && (
+          <button
+            className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200"
+            onClick={() => handleSpinUp(service.id)}
+          >
             Spin Up Service
           </button>
         )}
+
+        {isSpinningUp && <span className="text-xs font-medium text-gray-500">Spinning up...</span>}
 
         {service.deployments.edges.map((deployment) => {
           const isRunning = deployment.node.status === 'SUCCESS'
@@ -43,15 +84,17 @@ export default function ServiceCard({ service }: Props) {
                 {mapStatus(deployment.node.status)}
               </span>
 
-              {isRunning && (
+              {isRunning && !isSpinningDown && (
                 <button
                   className="text-xs font-medium px-3 py-1 rounded transition bg-red-100 text-red-800 hover:bg-red-200"
-                  onClick={() =>
-                    confirm(`Are you sure you want to spin down service ${service.name}?`)
-                  }
+                  onClick={() => handleSpinDown(deployment.node.id)}
                 >
                   Spin Down
                 </button>
+              )}
+
+              {isSpinningDown && (
+                <span className="text-xs font-medium text-gray-500">Spinning down...</span>
               )}
             </div>
           )

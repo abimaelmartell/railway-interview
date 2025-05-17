@@ -14,6 +14,14 @@ const QUERY = gql`
               node {
                 id
                 name
+                environments {
+                  edges {
+                    node {
+                      id
+                      name
+                    }
+                  }
+                }
                 services {
                   edges {
                     node {
@@ -51,52 +59,38 @@ const QUERY = gql`
 
 export type RailwayServiceStatus = 'SUCCESS' | 'FAILED' | 'REMOVED' | 'RUNNING' | string
 
+type Nodes<T> = {
+  edges: {
+    node: T
+  }[]
+}
+
 export type Deployment = {
   id: string
   status: RailwayServiceStatus
   createdAt: string
 }
 
-export type DeploymentEdge = {
-  node: Deployment
-}
-
 export type Service = {
   id: string
   name: string
   icon: string | null
-  deployments: {
-    edges: DeploymentEdge[]
-  }
-  repoTriggers: {
-    edges: RepoTriggerEdge[]
-  }
-}
-
-export type ServiceEdge = {
-  node: Service
+  deployments: Nodes<Deployment>
+  repoTriggers: Nodes<RepoTrigger>
 }
 
 export type Project = {
   id: string
   name: string
-  services: {
-    edges: ServiceEdge[]
-  }
-}
-
-export type ProjectEdge = {
-  cursor: string
-  node: Project
+  services: Nodes<Service>
+  environments: Nodes<RailwayEnvironment>
 }
 
 export type Workspace = {
   id: string
   name: string
   team: {
-    projects: {
-      edges: ProjectEdge[]
-    }
+    projects: Nodes<Project>
   }
 }
 
@@ -104,14 +98,19 @@ export type RepoTrigger = {
   provider: string
 }
 
-export type RepoTriggerEdge = {
-  node: RepoTrigger
-}
-
 export type RailwayProjectsWithServicesData = {
   me: {
     workspaces: Workspace[]
   }
+}
+
+export type RailwayEnvironment = {
+  id: string
+  name: string
+}
+
+export type RailwayEnvironmentEdge = {
+  node: RailwayEnvironment
 }
 
 export const fetchProjectsWithServices = async () => {
