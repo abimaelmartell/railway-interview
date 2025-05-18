@@ -50,7 +50,6 @@ const ServiceCard = ({ initialService, environment }: Props) => {
       <div className="grid grid-cols-1 gap-2">
         {!hasRunningDeployment && !pending && (
           <DeploymentRow
-            status="Not Running"
             isSpinningUp={isSpinningUp}
             onSpinUp={() => handleSpinUp(environment.id)}
           />
@@ -60,8 +59,7 @@ const ServiceCard = ({ initialService, environment }: Props) => {
           return (
             <DeploymentRow
               key={deployment.node.id}
-              deploymentId={deployment.node.id}
-              status={deployment.node.status}
+              deployment={deployment.node}
               isSpinningDown={isSpinningDown}
               onSpinDown={handleSpinDown}
             />

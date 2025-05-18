@@ -1,8 +1,8 @@
+import { Deployment } from '@/lib/gql/types'
 import DeploymentStatus from './DeploymentStatus'
 
 type Props = {
-  deploymentId?: string
-  status: string
+  deployment?: Deployment
   isSpinningDown?: boolean
   onSpinDown?: (id: string) => void
   isSpinningUp?: boolean
@@ -10,14 +10,13 @@ type Props = {
 }
 
 const DeploymentRow = ({
-  deploymentId,
-  status,
+  deployment,
   isSpinningDown,
   onSpinDown,
   isSpinningUp,
   onSpinUp,
 }: Props) => {
-  const isRunning = status === 'SUCCESS'
+  const isRunning = deployment?.status === 'SUCCESS'
 
   const containerClass = isRunning
     ? 'border-green-200 bg-green-50'
@@ -25,30 +24,43 @@ const DeploymentRow = ({
 
   const canSpinDown = isRunning && !isSpinningDown
 
+  const formattedDate = deployment?.createdAt
+    ? new Date(deployment.createdAt).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : null
+
   return (
-    <div className={`flex items-center justify-between px-3 py-2 border rounded ${containerClass}`}>
-      <DeploymentStatus
-        status={status}
-        isSpinningDown={isSpinningDown}
-        isSpinningUp={isSpinningUp}
-      />
+    <div className={`flex flex-col px-3 py-2 border rounded ${containerClass}`}>
+      <div className="flex items-center justify-between">
+        <DeploymentStatus
+          status={deployment?.status}
+          isSpinningDown={isSpinningDown}
+          isSpinningUp={isSpinningUp}
+        />
 
-      {deploymentId && canSpinDown && (
-        <button
-          className="text-xs font-medium px-3 py-1 rounded transition bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer"
-          onClick={() => onSpinDown?.(deploymentId)}
-        >
-          Spin Down
-        </button>
-      )}
+        {deployment?.id && canSpinDown && (
+          <button
+            className="text-xs font-medium px-3 py-1 rounded transition bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer"
+            onClick={() => onSpinDown?.(deployment.id)}
+          >
+            Spin Down
+          </button>
+        )}
 
-      {!deploymentId && (
-        <button
-          className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer"
-          onClick={() => onSpinUp?.()}
-        >
-          Spin Up
-        </button>
+        {!deployment?.id && (
+          <button
+            className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer"
+            onClick={() => onSpinUp?.()}
+          >
+            Spin Up
+          </button>
+        )}
+      </div>
+
+      {isRunning && formattedDate && (
+        <p className="text-xs text-gray-500 mt-2">Deployed on {formattedDate}</p>
       )}
     </div>
   )

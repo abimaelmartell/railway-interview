@@ -11,12 +11,14 @@ type Props = {
 
 const DeploymentStatus = ({ status, isSpinningDown, isSpinningUp }: Props) => {
   const isRunning = status === 'SUCCESS'
+
   const isPending =
     (status && DEPLOYMENT_PENDING_STATUSES.includes(status)) || isSpinningUp || isSpinningDown
+
   const colorClass = isRunning ? 'text-green-800' : 'text-yellow-800'
   const dotClass = isRunning ? 'bg-green-500' : 'bg-yellow-400'
 
-  let text = status && !isRunning ? capitalize(status) : 'Running'
+  let text = status ? capitalize(status) : 'Not Running'
 
   if (isSpinningUp) {
     text = 'Spinning up...'
@@ -24,6 +26,10 @@ const DeploymentStatus = ({ status, isSpinningDown, isSpinningUp }: Props) => {
 
   if (isSpinningDown) {
     text = 'Spinning down...'
+  }
+
+  if (isRunning && !isPending) {
+    text = 'Running'
   }
 
   return (
