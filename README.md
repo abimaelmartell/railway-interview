@@ -50,24 +50,31 @@ npm run dev
 ```
 
 ## Improvements
+
 - [x] CI for Build (Tests types)
-- [ ] Add relative timestamps (date-fns)
+- [x] Add relative timestamps (date-fns)
 - [ ] Toast feedback on spin up/down and errors
 - [ ] GraphQL codegen with graphql-codegen
 - [ ] Testing
 
 ## Tech Decisions
+
 ### Next.js + App Router
+
 Chosen for simplicity, built-in SSR, and API route support.
 
 ### GraphQL Request
+
 Used graphql-request for minimal, typed GraphQL queries without the overhead of Apollo.
 
 ### Manual polling logic
+
 Created a custom useServicePolling hook for fine-grained control over refresh intervals and retry limits without external state libraries.
 
 ### Modular component structure
+
 UI is broken down into `ServiceCard`, `DeploymentRow`, `ServiceCardHeader`, and a `useServiceActions` hook to keep logic and presentation decoupled.
 
 ### No useMemo / useCallback overuse
+
 React 19 has a new compiler that takes care of memoization of calculated values. Used only where needed (e.g., stable callback for polling).

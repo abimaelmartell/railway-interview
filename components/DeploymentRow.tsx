@@ -1,5 +1,6 @@
 import { Deployment } from '@/lib/gql/types'
 import DeploymentStatus from './DeploymentStatus'
+import { formatDistanceToNow } from 'date-fns'
 
 type Props = {
   deployment?: Deployment
@@ -23,13 +24,6 @@ const DeploymentRow = ({
     : 'border-yellow-200 bg-yellow-50'
 
   const canSpinDown = isRunning && !isSpinningDown
-
-  const formattedDate = deployment?.createdAt
-    ? new Date(deployment.createdAt).toLocaleString(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : null
 
   return (
     <div className={`flex flex-col px-3 py-2 border rounded ${containerClass}`}>
@@ -59,8 +53,10 @@ const DeploymentRow = ({
         )}
       </div>
 
-      {isRunning && !isSpinningDown && formattedDate && (
-        <p className="text-xs text-gray-500 mt-2">Deployed on {formattedDate}</p>
+      {isRunning && !isSpinningDown && deployment?.createdAt && (
+        <p className="text-xs text-gray-500 mt-2">
+          Deployed {formatDistanceToNow(new Date(deployment.createdAt), { addSuffix: true })}
+        </p>
       )}
     </div>
   )
