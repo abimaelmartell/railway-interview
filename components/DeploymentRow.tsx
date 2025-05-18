@@ -1,36 +1,55 @@
-import { mapStatus } from '@/lib/utils'
-import LoadingIcon from './LoadingIcon'
+import DeploymentStatus from './DeploymentStatus'
+
+type Props = {
+  deploymentId?: string
+  status: string
+  isSpinningDown?: boolean
+  onSpinDown?: (id: string) => void
+  isSpinningUp?: boolean
+  onSpinUp?: () => void
+}
 
 const DeploymentRow = ({
   deploymentId,
   status,
   isSpinningDown,
   onSpinDown,
-}: {
-  deploymentId: string
-  status: string
-  isSpinningDown: boolean
-  onSpinDown: (id: string) => void
-}) => {
+  isSpinningUp,
+  onSpinUp,
+}: Props) => {
   const isRunning = status === 'SUCCESS'
 
-  return (
-    <div className="flex items-center justify-between px-3 py-2 bg-green-50 border border-green-200 rounded">
-      <span className="text-sm font-medium text-green-800">{mapStatus(status)}</span>
+  const containerClass = isRunning
+    ? 'border-green-200 bg-green-50'
+    : 'border-yellow-200 bg-yellow-50'
 
-      {isRunning && !isSpinningDown ? (
+  const canSpinDown = isRunning && !isSpinningDown
+
+  return (
+    <div className={`flex items-center justify-between px-3 py-2 border rounded ${containerClass}`}>
+      <DeploymentStatus
+        status={status}
+        isSpinningDown={isSpinningDown}
+        isSpinningUp={isSpinningUp}
+      />
+
+      {deploymentId && canSpinDown && (
         <button
-          className="text-xs font-medium px-3 py-1 rounded transition bg-red-100 text-red-800 hover:bg-red-200"
-          onClick={() => onSpinDown(deploymentId)}
+          className="text-xs font-medium px-3 py-1 rounded transition bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer"
+          onClick={() => onSpinDown?.(deploymentId)}
         >
           Spin Down
         </button>
-      ) : isRunning && isSpinningDown ? (
-        <span className="text-xs font-medium text-gray-500 flex items-center gap-1">
-          <LoadingIcon className="w-4 h-4 animate-spin" />
-          Spinning down...
-        </span>
-      ) : null}
+      )}
+
+      {!deploymentId && (
+        <button
+          className="text-xs font-medium px-3 py-1 rounded transition bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer"
+          onClick={() => onSpinUp?.()}
+        >
+          Spin Up
+        </button>
+      )}
     </div>
   )
 }
