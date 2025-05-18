@@ -2,6 +2,9 @@ type Props = {
   className?: string
 }
 
+/**
+ * SVG from https://fontawesome.com/icons/arrows-rotate?s=solid
+ */
 const LoadingIcon = ({ className }: Props) => (
   <svg
     className={`text-gray-500 ${className ?? ''}`}
