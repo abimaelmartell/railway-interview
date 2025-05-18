@@ -1,12 +1,11 @@
 import ProjectCard from './ProjectCard'
-import { RailwayProjectsWithServicesData } from '@/lib/gql/fetch-services'
+import { ProjectsWithServicesData } from '@/lib/gql/types'
 
 type Props = {
-  data: RailwayProjectsWithServicesData
-  onChange: () => void
+  data: ProjectsWithServicesData
 }
 
-export default function WorkspaceList({ data, onChange }: Props) {
+export default function WorkspaceList({ data }: Props) {
   return (
     <>
       {data.me.workspaces.map((workspace) => (
@@ -14,7 +13,7 @@ export default function WorkspaceList({ data, onChange }: Props) {
           <h2 className="text-xl font-semibold">{workspace.name}</h2>
 
           {workspace.team.projects.edges.map(({ node }) => (
-            <ProjectCard key={node.id} project={node} onChange={onChange} />
+            <ProjectCard key={node.id} project={node} />
           ))}
         </div>
       ))}
