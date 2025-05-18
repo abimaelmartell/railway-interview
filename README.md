@@ -24,6 +24,7 @@ A simple, typed UI to spin up and spin down Railway containers using the public 
 | `serviceInstanceDeploy`                       | Spins up a new deployment of a service |
 | `deploymentRemove`                            | Deletes an existing deployment         |
 | `me.workspaces.projects.services.deployments` | Query for rendering the UI             |
+| `service`                                     | Query for refreshing a service         |
 
 ## Notes
 
