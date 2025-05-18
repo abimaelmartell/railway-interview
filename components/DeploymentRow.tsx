@@ -59,7 +59,7 @@ const DeploymentRow = ({
         )}
       </div>
 
-      {isRunning && formattedDate && (
+      {isRunning && !isSpinningDown && formattedDate && (
         <p className="text-xs text-gray-500 mt-2">Deployed on {formattedDate}</p>
       )}
     </div>

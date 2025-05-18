@@ -3,11 +3,13 @@ import { useCallback, useState } from 'react'
 import { hasPendingDeployment } from '@/lib/utils'
 import { Service, Environment } from '@/lib/gql/types'
 
-import DeploymentRow from './DeploymentRow'
-import ServiceCardHeader from './ServiceCardHeader'
 import useServiceActions from '@/hooks/useServiceActions'
 import useServicePolling from '@/hooks/useServicePolling'
+
 import refreshService from '@/lib/api/refresh-service'
+
+import DeploymentRow from './DeploymentRow'
+import ServiceCardHeader from './ServiceCardHeader'
 
 type Props = {
   initialService: Service
