@@ -17,7 +17,7 @@ type Props = {
 const MAX_POLL_ATTEMPTS = 30
 const POLL_INTERVAL_MS = 5000
 
-export default function ServiceCard({ initialService, environment }: Props) {
+const ServiceCard = ({ initialService, environment }: Props) => {
   const [service, setService] = useState<Service>(initialService)
 
   const handleRefresh = useCallback(async () => {
@@ -71,3 +71,5 @@ export default function ServiceCard({ initialService, environment }: Props) {
     </div>
   )
 }
+
+export default ServiceCard

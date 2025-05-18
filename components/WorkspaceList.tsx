@@ -5,7 +5,7 @@ type Props = {
   data: ProjectsWithServicesData
 }
 
-export default function WorkspaceList({ data }: Props) {
+const WorkspaceList = ({ data }: Props) => {
   return (
     <>
       {data.me.workspaces.map((workspace) => (
@@ -20,3 +20,5 @@ export default function WorkspaceList({ data }: Props) {
     </>
   )
 }
+
+export default WorkspaceList

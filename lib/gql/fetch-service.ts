@@ -14,7 +14,6 @@ const QUERY = gql`
             id
             status
             createdAt
-            meta
           }
         }
       }

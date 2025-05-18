@@ -7,7 +7,7 @@ const SERVICE_INSTANCE_DEPLOY = gql`
   }
 `
 
-export async function deployServiceInstance(serviceId: string, environmentId: string) {
+export const deployServiceInstance = async (serviceId: string, environmentId: string) => {
   return await railwayApi.request(SERVICE_INSTANCE_DEPLOY, {
     serviceId,
     environmentId,
