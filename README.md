@@ -30,7 +30,7 @@ A simple, typed UI to spin up and spin down Railway containers using the public 
 
 - Spin down is handled by calling deploymentRemove on the active deployment.
 - Spin up triggers a build process via serviceInstanceDeploy, which may take a few seconds.
-- After actions, the UI waits a few seconds and re-fetches via router.replace() to stay in sync.
+- After actions, the UI performs a targeted refresh of the affected service to stay in sync with the backend.
 
 ## Local Setup
 
